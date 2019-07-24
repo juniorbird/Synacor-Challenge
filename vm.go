@@ -4,30 +4,42 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
-	msg, err := parseArgs(os.Args)
-	resultifier(msg, err)
+	cmd, input, err := parseArgs(os.Args)
+	resultifier(cmd, input, err)
 }
 
-func parseArgs(args []string) (msg string, err error) {
-	hasMsg := len(args) > 1
+// parseArgs separates out the command from the input
+// It dumps you out if you don't provide a command or if the command provided isn't valid
+func parseArgs(args []string) (cmd uint16, input []string, err error) {
+	hasArgs := len(args) > 1
 
-	if !hasMsg {
-		msg = "please supply a message"
-		err = errors.New("no message")
-	} else {
-		msg = args[1]
-		err = nil
+	if !hasArgs {
+		err = errors.New("no command supplied")
+		return 0, nil, err
 	}
 
-	return msg, err
+	input = strings.Split(args[1], ",")
+	var cmd64 uint64
+	cmd64, err = strconv.ParseUint(input[0], 10, 16)
+	cmd = uint16(cmd64)
+	input = input[1:]
+
+	return cmd, input, err
 }
 
-func resultifier(msg string, err error) {
-	fmt.Printf("the message is: %s\n", msg)
-	if err != nil || len(msg) < 1 {
+// func routeCommand(cmd uint16) (result string, err error) {
+// 	result = fmt.Printf("You told me to do command %d\n", cmd)
+// 	return result, err
+// }
+
+func resultifier(cmd uint16, input []string, err error) {
+	fmt.Printf("the command is: %d\n", cmd)
+	if err != nil {
 		os.Exit(1)
 	}
 	os.Exit(0)
